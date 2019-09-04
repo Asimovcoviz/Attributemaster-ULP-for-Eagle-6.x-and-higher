@@ -12,7 +12,7 @@ This documentation explains the use of:
 
 
 ###The partlist
-![partlist](Attributemaster_partlist.jpg)
+![partlist](doku/Attributemaster_partlist.jpg)
 
 By starting the ULP, you'll see a partlist at first place. 
 All parts in the sheet are sorted by their values and attributes. All *equal* parts are stored in one row. The first column shows you the names of each equal part followed by their number.
