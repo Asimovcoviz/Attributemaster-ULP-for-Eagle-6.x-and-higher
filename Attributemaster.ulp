@@ -1,0 +1,793 @@
+int reopen = strtol(argv[1]);
+int resel = strtol(argv[2]);
+int repa = strtol(argv[3]);
+int remove = strtol(argv[4]);
+int selected;
+int sela;
+int sel_parts;
+//string parts[];
+int recheck[];
+
+if (reopen != 0) {    //Bei Bedarf erweitern
+	int x;
+	while(argv[x+5] != "END") {
+		recheck[x] = strtol(argv[x+5]);
+		x++;
+	}
+	recheck[x+5] = -1;
+	x=0;
+}
+
+string part_names[];
+int part_nbr[];
+int panzahl;
+string outp[];
+string header = "Namen";
+int parsed_nbrs[];
+int part_ck[];
+string current_part_values[];
+
+
+string sel_atr[];
+
+string atr[];
+
+if (reopen == 1) {
+	string cmd = "ASSIGN BS;";
+	cmd += "ASSIGN Alt+W;";
+	cmd += "ASSIGN Alt+S;";
+	cmd += "ASSIGN Alt+Q;";
+	
+	cmd += "RUN Attributemaster 2 ";
+	
+	string s;              //Konvertierung
+	sprintf(s,"%d",resel);
+	cmd += s + " ";
+	sprintf(s,"%d",repa);
+	cmd += s + " ";
+	sprintf(s,"%d",remove);
+	cmd += s + " ";
+	
+	int x;
+	while(recheck[x] != -1) {
+		string s;
+		sprintf(s, "%d", recheck[x]);
+		cmd += s + " ";
+		x++;
+	}
+	
+	cmd += "END;";
+	exit(cmd);
+}
+
+else if (reopen == 2) {
+			selected = resel;
+			sel_parts = repa+remove;
+			if (sel_parts<0) sel_parts=0;
+			
+			//window_parts(selected);
+		}
+		
+else if (reopen == 3) {
+	selected = resel;
+	if (repa>0) sel_parts = repa-1;
+	
+	remove = 0;
+	
+}
+
+else if (reopen == 4) {
+	selected = resel;
+	sel_parts = repa+1;
+	
+	remove = 0;
+	
+}
+
+else if (reopen == 5) {
+	selected = resel;
+	sel_parts = repa;
+	if (recheck[sel_parts] == 0) recheck[sel_parts] = 1;
+	else recheck[sel_parts] = 0;
+	
+}
+void convert_command(string start, string end, int count_parts) {
+	string cmd,s;
+	cmd += start; 
+	
+	sprintf(s,"%d",selected);     //Konvertierung
+	cmd += s + " ";
+	sprintf(s,"%d",sel_parts);
+	cmd += s + " ";
+	sprintf(s,"%d",remove);
+	cmd += s + " ";
+	
+	int x;
+	while(x<count_parts) {   
+		string s;
+		sprintf(s, "%d", part_ck[x]);
+		cmd+= s + " ";
+		x++;
+	}
+
+	cmd += end;
+	
+	string ecmd;
+	//ecmd += "EDIT .SCH;\n" + cmd + "EDIT .BRD;\n" + cmd;
+	ecmd = cmd;
+	
+	exit(ecmd);
+}
+
+
+
+void show_part(string p, int z) {
+	string cmd,s;
+	//cmd += "WINDOW FIT;";
+	cmd += "ASSIGN BS 'RUN Attributemaster 1 ";
+	
+	sprintf(s,"%d",selected);     //Konvertierung
+	cmd += s + " ";
+	sprintf(s,"%d",sel_parts);
+	cmd += s + " ";
+	sprintf(s,"%d",remove);
+	cmd += s + " ";
+	
+	int x;
+	while(x<z) {   
+		string s;
+		sprintf(s, "%d", part_ck[x]);
+		cmd+= s + " ";
+		x++;
+	}
+	
+	
+	cmd += "END';";
+	
+	
+	cmd += "ASSIGN Alt+W 'RUN Attributemaster 3 ";
+	sprintf(s,"%d",selected);     //Konvertierung
+	cmd += s + " ";
+	sprintf(s,"%d",sel_parts);
+	cmd += s + " ";
+	sprintf(s,"%d",remove);
+	cmd += s + " ";
+	
+	x=0;
+	while(x<z) {   
+		string s;
+		sprintf(s, "%d", part_ck[x]);
+		cmd += s + " ";
+		x++;
+	}
+	
+	cmd += "END';";
+	
+	
+	cmd += "ASSIGN Alt+S 'RUN Attributemaster 4 ";
+	sprintf(s,"%d",selected);     //Konvertierung
+	cmd += s + " ";
+	sprintf(s,"%d",sel_parts);
+	cmd += s + " ";
+	sprintf(s,"%d",remove);
+	cmd += s + " ";
+	
+	x=0;
+	while(x<z) {   
+		string s;
+		sprintf(s, "%d", part_ck[x]);
+		cmd += s + " ";
+		x++;
+	}
+	
+	cmd += "END';";
+	
+	cmd += "ASSIGN Alt+Q 'RUN Attributemaster 5 ";
+	sprintf(s,"%d",selected);     //Konvertierung
+	cmd += s + " ";
+	sprintf(s,"%d",sel_parts);
+	cmd += s + " ";
+	sprintf(s,"%d",remove);
+	cmd += s + " ";
+	
+	x=0;
+	while(x<z) {   
+		string s;
+		sprintf(s, "%d", part_ck[x]);
+		cmd += s + " ";
+		x++;
+	}
+	
+	cmd += "END';";
+	
+	cmd+= "SHOW @ ";
+	cmd += p;
+	exit(cmd);
+	
+}
+
+
+
+void change_atr(int nbr, string atr, string newValue) {
+	string s, cmd;
+	int count_parts;
+	schematic(S) {
+		int count_hits;
+		S.parts(P) {
+			if (part_nbr[count_parts] == nbr){
+				if (part_ck[count_hits] == 1) {
+					if (atr == "VALUE") sprintf(s, "VALUE %s %s;\n", P.name, newValue);
+					//else if (atr == "DEVICE") sprintf(s, "DEVICE %s %s;\n", P.name, newValue);
+					else if (atr == "PACKAGE") sprintf(s, "PACKAGE %s %s;\n", P.name, newValue);
+					else sprintf(s, "ATTRIBUTE %s %s '%s';\n", P.name, atr, newValue);
+					cmd += s;
+				}
+				count_hits++;
+			}
+			count_parts++;
+		}
+	}
+	cmd += "RUN Attributemaster 2 ";
+	convert_command(cmd,"END;",count_parts);
+}
+
+
+void del_atr(int nbr, string atr) {
+	string s, cmd;
+	int count_parts;
+	schematic(S) {
+		int count_hits;
+		S.parts(P) {
+			if (part_nbr[count_parts] == nbr){
+				if (part_ck[count_hits] == 1) {
+					if (atr != "VALUE") sprintf(s, "ATTRIBUTE %s '%s' DELETE;\n", P.name, atr);
+					cmd += s;
+				}
+				count_hits++;
+			}
+			count_parts++;
+		}
+	}
+	cmd += "RUN Attributemaster 2 ";
+	convert_command(cmd,"END;",count_parts);
+}
+
+
+
+void set_atr(int nbr, string atr, string newValue) {
+	string s, cmd;
+	int count_parts;
+	schematic(S) {
+		int count_hits;
+		S.parts(P) {
+			if (part_nbr[count_parts] == nbr){
+				if (part_ck[count_hits] == 1) {
+					sprintf(s, "ATTRIBUTE %s %s '%s';\n", P.name, atr, newValue);
+					cmd += s;
+				}
+				count_hits++;
+			}
+			count_parts++;
+		}
+	}
+	cmd += "RUN Attributemaster 2 ";
+	convert_command(cmd,"END;",count_parts);
+}
+
+
+
+
+
+
+void window_parts() {
+	
+	int select_atr;
+	string input;
+	string parts[];
+	int z=0;
+
+	select_atr=0;input="";
+			
+			//_________Parts suchen________________________________________
+			string part_atr[];
+			int count_parts, parse, i;
+			schematic(S) {
+				int exist[];
+				S.parts(P) {
+					
+					if (part_nbr[count_parts] == parsed_nbrs[selected]) {
+						parts[parse] = P.name;
+						
+						P.attributes(A) {
+							i=0;
+							
+							while (atr[i] != "") {
+								if (A.name == atr[i]) {
+									part_atr[i+1] = A.value;              //Anpassbar
+									exist[i+1] = 1;
+									}
+								i++;
+							}
+							
+						}
+						part_atr[0] = P.value;
+						//if (P.device.package) part_atr[1] = P.device.package.name;
+						
+						parse++;
+						}
+					count_parts++;
+				}
+				
+				int y=1;
+				while(y<(i+1)) {
+					if (!exist[y]) part_atr[y] = "-";
+				
+					y++;
+				}
+			}
+			
+			while(parts[z] != "") {
+				
+				if (reopen == 0) part_ck[z] = 1;
+				else part_ck[z] = recheck[z];
+				z++;
+			}
+		
+			
+			if ((reopen == 3) || (reopen == 4) || (reopen == 5)) {
+				
+				if (sel_parts >= parse) sel_parts--;
+				
+				
+				show_part(parts[sel_parts],z);
+			}
+			z=0;
+			
+			
+		//_____________Fenster anzeigen_____________________________
+			int Result2 = dlgDialog("Attributemaster") {
+			
+				string head2 = "Namen";
+				int sel2;
+				
+		dlgVBoxLayout {
+		
+			dlgListView(header, outp, selected) {
+				string cmd;
+				sel_parts = 0;
+				cmd += "RUN Attributemaster 2 ";
+				string s;
+				sprintf(s,"%d",selected);     //Konvertierung
+				cmd += s + " ";
+				sprintf(s,"%d",sel_parts);
+				cmd += s + " ";
+				sprintf(s,"%d",remove);
+				cmd += s + " ";
+				
+				int x;
+				while(x<count_parts) {   
+					string s;
+					sprintf(s, "%d", 1);
+					cmd+= s + " ";
+					x++;
+				}
+				
+				cmd += "END;";
+				exit(cmd);
+			}
+			
+			dlgHBoxLayout {	
+			dlgVBoxLayout {	
+					
+					
+				dlgHBoxLayout {
+					dlgVBoxLayout {
+						
+						
+						dlgGroup("Parts") {  					   //Checkboxen
+							
+							while(parts[z] != "") {
+							string s = parts[z];
+							dlgCheckBox(s, part_ck[z]);
+							z++;
+							}
+						}
+						dlgStretch(1);
+						}
+						
+					
+				}				
+					
+				
+					
+				dlgHBoxLayout {	
+					
+					dlgPushButton("Alle auswählen") {
+						
+						int x;
+						while(parts[x] != "") {
+							part_ck[x] = 1;
+							x++;
+						}
+					}
+					
+					dlgPushButton("Alle abwählen") {
+						
+						int x;
+						while(parts[x] != "") {
+							part_ck[x] = 0;
+							x++;
+						}
+					}
+					
+					dlgPushButton("Switch") {
+						
+						int x;
+						while(parts[x] != "") {
+							if (part_ck[x] == 0) part_ck[x] = 1;
+							else part_ck[x] = 0;
+							x++;
+						}
+					}
+				
+				}	
+					
+					dlgComboBox(sel_atr, select_atr);      			   //Combobox
+					
+					dlgStringEdit(input);
+					dlgPushButton("Ändern") {
+						if (input != "") {
+							if (dlgMessageBox("Attribut '" + sel_atr[select_atr] + "' für selektierte Parts auf '" + input + "' ändern?", "OK", "Abbrechen") == 0) 
+								change_atr(parsed_nbrs[selected],sel_atr[select_atr],input);
+						}
+						else change_atr(parsed_nbrs[selected],sel_atr[select_atr],input);
+					}
+				
+			}
+			
+			
+			string atr_list[];
+			int i=0;
+			while(atr[i] != "") {
+				atr_list[i] = sel_atr[i] + "\t" + (part_atr[i]);
+				i++;
+			}
+			
+			
+			dlgVBoxLayout {
+				int sorta=0;
+				dlgListView("Attribut\tWert", atr_list, sela,sorta) {			//Attributsliste
+					select_atr = sela;
+					if (part_atr[sela] != "-") input = part_atr[sela];
+					else input = "";
+				}
+				
+				dlgHBoxLayout {
+					
+				
+						dlgPushButton("Attribut hinzufügen") {							//Attributbuttons
+							int Result3 = dlgDialog("Attribut anlegen") {
+								dlgVBoxLayout {
+									dlgLabel("Selektierten Parts das Attribut X mit Wert Y zuweisen");
+									string newA = "X";
+									dlgStringEdit(newA);
+									string newV = "Y";
+									dlgStringEdit(newV);
+									
+									dlgHBoxLayout {
+										dlgPushButton("+Anlegen") {set_atr(parsed_nbrs[selected],newA, newV);}
+										dlgPushButton("Abbrechen") {dlgReject();}
+									}
+								}
+							};
+						
+						
+						}
+					
+					
+					dlgPushButton("Gewähltes Attribut entfernen") {
+						if (dlgMessageBox("Attribut '" + sel_atr[sela] + "' für selektierte Parts löschen?", "OK", "Abbrechen") == 0) 
+							del_atr(parsed_nbrs[selected],sel_atr[sela]);
+						}
+				}
+			}	
+
+			dlgVBoxLayout {
+				
+				dlgListBox(parts, sel_parts) {show_part(parts[sel_parts],z);}		//Partliste
+				
+				
+				
+				dlgHBoxLayout {
+				
+				
+					/*string s1,s2,s3;
+					s1 += (remove == -1 ? "(" : "") + "aufwärts" + (remove == -1 ? ")" : "");
+					dlgPushButton(s1) {
+						remove = -1;
+						
+					}
+					s2 += (remove == 0 ? "(" : "") + "0" + (remove == 0 ? ")" : "");
+					dlgPushButton(s2) {
+						remove = 0;
+						
+					}
+					s3 += (remove == 1 ? "(" : "") + "abwärts" + (remove == 1 ? ")" : "");
+					dlgPushButton(s3) {
+						remove = 1;
+						
+					}
+					*/
+					
+					dlgGroup("Beim Anzeigen durch die Liste wandern") {
+						int radioindex;
+						if (remove == -1) radioindex = 0;
+						else if (!remove) radioindex = 1;
+						else radioindex = 2;
+						
+						dlgRadioButton("Aufwärts",radioindex) {remove = -1;}
+						dlgRadioButton("Konstant",radioindex) {remove = 0;}
+						dlgRadioButton("Abwärts",radioindex) {remove = 1;}
+					}
+					
+					
+				}
+				dlgPushButton("+Auf Schaltplan zeigen") {show_part(parts[sel_parts],z);}
+				
+			}
+			
+			}
+			}
+			
+			};
+}
+
+//_________________________________________________________________
+
+void sort_atr() {
+	if (schematic) {
+		schematic(S) {
+			
+			S.parts(P) {                        //Werte einholen
+				part_names[panzahl] = P.name;
+				part_nbr[panzahl] = panzahl+1;
+				panzahl++;
+			}
+		}
+		
+		schematic(S) {
+			string pvalue, pdevice, ppackage, pheadline, pdescr, ppackvalue,phead;
+			string patrb_names[], patrb_values[];
+			int countV, countS;
+			
+			int c, c1, c2;
+			do {
+			S.parts(P) {
+			
+				//___________Daten vergleichen________________________________________
+					
+					if (c > c2) { 
+						int errors;
+						if (P.value != pvalue) errors++;
+						if (P.device.name != pdevice) errors++;
+						if ((P.device.package) && (P.device.package.name != ppackage)) errors++;
+						if (P.device.headline != pheadline) errors++;
+						if (P.device.description != pdescr) errors++;
+						if (P.device.value != ppackvalue) errors++;
+						if (P.device.headline != phead) errors++;
+						
+						
+						countV = 0;
+						P.attributes(A) {
+							if ((A.name != patrb_names[countV]) || (A.value != patrb_values[countV])) errors++;
+							countV++;
+						}
+						
+						if (countV != countS) errors++;
+						if (errors == 0) part_nbr[c] = part_nbr[c2];
+						
+					}
+					
+					//___________Daten sammeln___________________________________________
+					   
+					   if (c == c2) {
+						pvalue = P.value; 
+						pdevice = P.device.name; 
+						if (P.device.package) ppackage = P.device.package.name; 
+						pheadline = P.device.headline;
+						pdescr = P.device.description; 
+						ppackvalue = P.device.value;
+						phead = P.device.headline;
+						
+						countS = 0;
+						P.attributes(A) {
+							patrb_names[countS] = A.name;
+							patrb_values[countS] = A.value;
+							countS++;
+						}
+					   }
+					c++;
+				//________________________________________________________________________
+				
+			}
+			c1 = c;
+			c=0;
+			c2++;
+			} while(c2 < c1);
+			
+		}
+	}
+	return;
+}
+
+//_________________________________________________________________
+void listView() {	
+	header = "Namen";
+	header += "\tValue\tDevice\tPackage\tDescription";
+	
+	schematic(S) {
+	
+		int count_parts=0, current_nbr = -1, parse=0;
+		
+		
+		//___________Parsed Numbers___________________________
+		int count_parsed;
+		
+		S.parts(P) {
+			int i, x=1;
+			while (count_parsed > i) {
+				if (parsed_nbrs[i] == part_nbr[count_parts]) x=0;
+				i++;
+			}
+			
+			if (x) {
+				parsed_nbrs[i] = part_nbr[count_parts];
+				count_parsed++;
+			}
+			
+			count_parts++;
+		
+		}
+		
+	
+		//____________Namen_____________________________
+		
+		int count_nbr[];
+		
+		for (int m=0; m<count_parsed; m++) {
+			for (int n=0; n<panzahl; n++) {
+				if (part_nbr[n] == parsed_nbrs[m]) {
+					outp[m] += " " + part_names[n];
+					count_nbr[m]++;
+				}
+			}
+		}
+		
+		for (int j=0;j<count_parsed;j++) {
+				string s;
+				sprintf(s, "%d", count_nbr[j]);
+				outp[j] += " (" + s + ")" + "\t";
+		}
+		
+		//__________Values____________________
+	
+	
+		int nbr=-1, count,line=0;
+		int done[];
+		
+		S.parts(P) {
+			int i, x=1;
+			while(count_parsed > i) {
+				if (part_nbr[count] == done[i]) x=0;
+				i++;
+			}
+		
+			if ((part_nbr[count] != nbr) && x){
+				nbr = part_nbr[count];
+				string pack = " ";
+				if (P.device.package) pack = P.device.package.name;
+				outp[line] += P.value + "\t" + P.device.name + "\t" + pack + "\t" + P.device.headline + "\t";
+				
+				done[line] = nbr;
+				line++;
+			}
+		count++;
+		}
+		
+		
+		
+	//______________Attribute finden_____________________________
+		count=0;
+	
+		S.parts(P) {
+			P.attributes(A) {
+				if (!A.constant) {
+				int x=1, i;
+				while (atr[i] != "") {
+					if (atr[i] == A.name) x = 0;
+					i++;
+				}
+				
+				if (x) {
+					atr[count] = A.name;
+					header += "\t" + A.name;
+					//werte[count] = " ";
+					count++;
+				}
+			    }
+			}
+		}
+	
+	
+	//_______________Attribute füllen___________________________
+	
+
+	int i;
+	
+	while(atr[i] != "") {
+	int done2[];
+	
+	count_parts=0; current_nbr=-1;parse=0;
+		S.parts(P) {
+		
+			int z, x=1;
+			while(count_parsed > z) {
+				if (part_nbr[count_parts] == done2[z]) x=0;
+				z++;
+			}
+		
+			if ((part_nbr[count_parts] != current_nbr) && x) {
+				current_nbr = part_nbr[count_parts];
+				done2[parse] = current_nbr;
+				
+				int exist;
+				P.attributes(A) {
+			
+					if (A.name == atr[i]) {
+						exist++;
+						
+						outp[parse] += A.value + "\t";
+						current_part_values[parse] = A.value;
+						//break;
+					}
+					
+				}
+				
+				if (!exist) {
+					outp[parse] += "-" + "\t";
+					current_part_values[parse] = "-";
+				}
+				parse++;
+			}
+			
+			
+			count_parts++;
+		}
+		
+		
+		i++;
+	}
+}
+}
+
+//__________________Main_________________________________
+
+sort_atr();
+listView();
+
+//________Werte in der Attributsliste ergänzen___________
+
+
+sel_atr[0] = "VALUE";
+//sel_atr[1] = "DEVICE";
+//sel_atr[1] = "PACKAGE";
+
+int i=1;
+while(atr[i-1] != "") {			//Anpassbar...
+sel_atr[i] = atr[i-1];
+i++;
+}
+//_______________Fenster___________________
+
+
+window_parts();
