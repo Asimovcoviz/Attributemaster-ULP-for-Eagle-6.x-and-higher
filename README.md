@@ -25,11 +25,11 @@ By **doubleclicking** on a row, the parts are listed below the partlist.
 
 ...shows you all attributes used in your sheet followed by the value given to the *selected* parts. **Doubleclicking** one of the attributes will copy the name and value to the *modification-field*.
 
-![attributelist](Attributemaster_attributelist.jpg) 
+![attributelist](doku/Attributemaster_attributelist.jpg) 
 
 By clicking *'Add attribute'*, you can create a new attribute for **all checked parts** in the checkboxes. Enter the name of the new attribute in the first inputfield and the value of the new attribute in the second inputfield. *Note: You can leave the value of the new attribute empty. It will be created without any value and therefore be marked with `-`.*
 
-![add](at_add.jpg)
+![add](doku/at_add.jpg)
 
 By clicking *'Delete attribute'*, you can delete the attribute selected in the attributelist for **all checked parts** in the checkboxes. 
 If the attribute is defined within a library, it can't be deleted and will be recreated with it's *standardvalue*.
@@ -44,7 +44,7 @@ Using the buttons 'Select all', 'Deselect all', and 'Switch', which toggles all 
 
 On the right side of the ULP you can see a list of *all currently selected* parts. By doubleclicking at one part, clicking on *'Show on sheet'* or hitting `Enter`, the selected part will be shown on your sheet. 
 
-![show](at_show.jpg)
+![show](doku/at_show.jpg)
 
 You are now in a special *selecting-mode*. By pressing `Alt+S` or `Alt+W` you can switch through *all currently selected parts*. By pressing `Alt+Q`, the current part will be checked or dechecked in the checkboxes, depending on how it was before. **By pressing `Return` you will return to the previous window of *Attributemaster*, with all changes of the checkboxes taken over.**
 
